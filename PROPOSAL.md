@@ -2,27 +2,39 @@
 
 ## Group Members:
 
-names here.(CHANGE THIS!!!!!)
+Sean Chen
+
+Debojit Sarker
        
 # Intentions:
 
-A statement of the problem you are solving and/or a high level description of the project. (CHANGE THIS!!!!!)
-    
+Server that allows clients to connect two at a time to play battleship against each other, can handle multiple instances. 
+
+
 # Intended usage:
 
-A description as to how the project will be used (describe the user interface). (CHANGE THIS!!!!!)
+ASCII board for displaying ships/bombs 
+
+Prompts the players for ship position, where to throw bombs. 
   
 # Technical Details:
 
-(CHANGE THIS!!!!!)
+Sockets : server and clients, manage messages, manage matchmaking - Both
 
-A description of your technical design. This should include: 
-   
-How you will be using the topics covered in class in the project.
-     
-How you are breaking down the project and who is responsible for which parts.
-  
+Allocating Memory : managing ships and grid - Debojit
+
+Signals : catch keyboard inputs - Sean
+
+Processes: allows our server to handle multiple matches - Both
+
+[Possible Extras if Time]
+
+Files + Finding Info About Files : Leaderboard with match wins and usernames
     
 # Intended pacing:
 
-A timeline with expected completion dates of parts of the project. (CHANGE THIS!!!!!)
+1/9: Working Server System/Forks
+
+1/12: Server has to handle at least one battleship match  
+
+1/16: Polished game, file stuff if extra time
