@@ -25,9 +25,10 @@ S = ship
 X = hit
 
 example bomb screen:  
-X 0 O
-O 0 0
-H X 0
+  1 2 3  
+A X 0 O  
+B O 0 0  
+C H X 0  
 
 X = fully dead ship 
 H = hit ship (becomes X when that specific ship is sunk)
