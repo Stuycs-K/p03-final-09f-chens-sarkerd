@@ -14,22 +14,25 @@ Server takes clients 2 at a time. The server will block for response from client
 client will display bomb/ship screens:
 
 example ship screen:  
-▢ ▢ ■  
-■ ■ ■  
-■ ■ ▢  
+  1 2 3  
+A 0 0 0    
+B X 0 0   
+C S S 0  
 
-▢ = ship
-■ = water
+
+S = ship
+0 = water
+X = hit
 
 example bomb screen:  
-X O ■  
-■ ■ ■  
-O ■ H  
+X 0 O
+O 0 0
+H X 0
 
 X = fully dead ship 
-H = hit ship (becomes X when all ship tiles are lost)
+H = hit ship (becomes X when that specific ship is sunk)
 O = miss
-■ = Water
+0 = Water
 
 
 
