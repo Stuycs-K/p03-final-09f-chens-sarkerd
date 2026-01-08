@@ -31,14 +31,14 @@ void subserver_logic(int client_socket1, int client_socket2){
   printf("Forked!\n");
   char sendtoclient1[256];
   char sendtoclient2[256];
-  int read = 1;
-  int block = 0;
-  int write = 2;
+  int readstate = 1;
+  int blockstate = 0;
+  int writestate = 2;
   while(1) {
     //below is the turn logic when client1s turn
-    int n = write(client_socket1, &read,sizeof(int));
+    int n = write(client_socket1, &readstate,sizeof(int));
     err(n,"error setting turn to 1st client when client1 turn");
-    n = write(client_socket2, &block,sizeof(int));
+    n = write(client_socket2, &blockstate,sizeof(int));
     err(n,"error setting turn to 2nd client when client1 turn");
 
     // read from client1 and rotate response
@@ -49,9 +49,9 @@ void subserver_logic(int client_socket1, int client_socket2){
     rot13(sendtoclient2);
 
     //below is the turn logic when client2s turn
-    n = write(client_socket1, &block,sizeof(int));
+    n = write(client_socket1, &blockstate,sizeof(int));
     err(n,"error setting turn to 1st client when client2 turn");
-    n = write(client_socket2, &read,sizeof(int));
+    n = write(client_socket2, &readstate,sizeof(int));
     err(n,"error setting turn to 2nd client when client2 turn");
 
     // read from client2 and rotate response
@@ -62,9 +62,9 @@ void subserver_logic(int client_socket1, int client_socket2){
     rot13(sendtoclient1);
 
     //set turn to write so clients can read the other clients response
-    n = write(client_socket1, &write,sizeof(int));
+    n = write(client_socket1, &writestate,sizeof(int));
     err(n,"error setting turn to 1st client when write turn");
-    n = write(client_socket2, &write,sizeof(int));
+    n = write(client_socket2, &writestate,sizeof(int));
     err(n,"error setting turn to 2nd client when write turn");
 
     //write to both clients
@@ -74,9 +74,9 @@ void subserver_logic(int client_socket1, int client_socket2){
     err(byte,"subserver_logic write to client 2 error");
 
     //end off by blocking both clients
-    n = write(client_socket1, &block,sizeof(int));
+    n = write(client_socket1, &blockstate,sizeof(int));
     err(n,"error setting turn to 1st client when block turn");
-    n = write(client_socket2, &block,sizeof(int));
+    n = write(client_socket2, &blockstate,sizeof(int));
     err(n,"error setting turn to 2nd client when block turn");
     continue;
   }
