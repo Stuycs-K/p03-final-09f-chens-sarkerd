@@ -1,5 +1,7 @@
 #include "networking.h"
-
+#define WRITE 1
+#define WAIT 0
+#define READ 2
 int server_socket = -1;
 
 static void sighandler(int signo) {
@@ -9,22 +11,34 @@ static void sighandler(int signo) {
 }
 
 void clientLogic(int server_socket){
+  int turn;
+  char buffer[256];
   while(1) {
-    int id=-1;
-    int r = read(server_socket,&id,sizeof(int));
-    err(r,"error setting id");
-    if(id==2) {
-      r = read(server_socket,NULL,256);//this is the waiting system, work from here
+    int curTurn; //idea for printing that its not your turn
+    int r = read(server_socket,&turn,sizeof(int));
+    err(r,"error reading turn in client");
+
+    if(turn==WRITE) {
+      printf("Enter a message:");
+      if(!fgets(buffer,sizeof(buffer),stdin))break;
+      int w = write(server_socket,buffer,sizeof(buffer));
+      err(w,"write error in clientLogic");
     }
-    char buffer[256];
-    printf("Enter a message:");
-    if(!fgets(buffer,sizeof(buffer),stdin))break;
-    int w = write(server_socket,buffer,sizeof(buffer));
-    err(w,"write error in clientLogic");
-    int r = read(server_socket,buffer,sizeof(buffer));
-    err(r,"read error in clientLogic");
-    if(!r)break;
-    printf("Recieved: %s",buffer);
+
+    else if(turn==WAIT) {
+      continue;
+    }
+
+    else if(turn==READ) {
+      int r = read(server_socket,buffer,sizeof(buffer));
+      err(r,"read error in clientLogic");
+      if(!r)break;
+      printf("Recieved: %s",buffer);
+    }
+    else {
+      printf("TURN ISNT ONE OF THE CHOICES.\n");
+      break;
+    }
   }
   printf("Client closed.\n");
   close(server_socket);
