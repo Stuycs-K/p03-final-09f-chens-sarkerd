@@ -39,18 +39,16 @@ void subserver_logic(int client_socket1, int client_socket2){
     int n = write(client_socket1, &readstate,sizeof(int));
     err(n,"error setting turn to 1st client when client1 turn");
     n = write(client_socket2, &blockstate,sizeof(int));
-    err(n,"error setting turn to 2nd client when client1 turn");
+    err(n,"error setting block to 2nd client when client1 turn");
 
     // read from client1 and rotate response
     n = read(client_socket1,sendtoclient2,sizeof(sendtoclient2));
     err(n,"error reading client1 initial");
     if(!n)break;
 
-    rot13(sendtoclient2);
-
     //below is the turn logic when client2s turn
     n = write(client_socket1, &blockstate,sizeof(int));
-    err(n,"error setting turn to 1st client when client2 turn");
+    err(n,"error setting block to 1st client when client2 turn");
     n = write(client_socket2, &readstate,sizeof(int));
     err(n,"error setting turn to 2nd client when client2 turn");
 
@@ -58,8 +56,6 @@ void subserver_logic(int client_socket1, int client_socket2){
     n = read(client_socket2,sendtoclient1,sizeof(sendtoclient1));
     err(n,"error reading client2 initial");
     if(!n)break;
-
-    rot13(sendtoclient1);
 
     //set turn to write so clients can read the other clients response
     n = write(client_socket1, &writestate,sizeof(int));
@@ -96,7 +92,7 @@ int main(int argc, char *argv[] ) {
     printf("Main server waiting for connection...\n");
     client_socket1 = server_tcp_handshake(listen_socket);
     client_socket2 = server_tcp_handshake(listen_socket);
-    printf("Connection made with client! Forking...\n");
+    printf("Game 1 made with two clients!\n") //make this print out the pids of both clients soon
     pid_t p = fork();
     if(p<0){//error
       perror("fork");
