@@ -28,10 +28,9 @@ example bomb screen:
  <u>1 2 3</u>  
 A| X 0 O  
 B| O 0 0  
-C| H X 0  
+C| 0 X 0  
 
-X = fully dead ship 
-H = hit ship (becomes X when that specific ship is sunk)
+X = dead ship 
 O = miss
 0 = Water
 
