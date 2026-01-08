@@ -1,6 +1,6 @@
 #ifndef GAME_H
 #define GAME_H
-struct board{
+struct Board{
     int ships_remaining;
     char grid[3][3];
 }
