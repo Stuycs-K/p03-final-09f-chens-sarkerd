@@ -3,6 +3,7 @@
 #define WAIT 0
 #define READ 2
 int server_socket = -1;
+int otherclientconnected=0;
 
 static void sighandler(int signo) {
   printf("Client closed.\n");
@@ -11,6 +12,7 @@ static void sighandler(int signo) {
 }
 
 void clientLogic(int server_socket){
+  printf("Both clients connected! Game started.\n");
   int turn;
   char buffer[256];
   while(1) {
@@ -53,6 +55,13 @@ int main(int argc, char *argv[] ) {
   }
   server_socket = client_tcp_handshake(IP);
   printf("Connection made with server!\n");
+  int n = read(server_socket,&otherclientconnected,sizeof(int));
+  err(n,"initial otherclientconnected setup");
+  if(!otherclientconnected)printf("Waiting for other client to connect...\n");
+  while(!otherclientconnected) {
+    n = read(server_socket,&otherclientconnected,sizeof(int));
+    err(n,"loop otherclientconnected setup");
+  }
   clientLogic(server_socket);
 
   return 0;

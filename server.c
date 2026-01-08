@@ -27,6 +27,17 @@ char* rot13(char*s) {
   return s;
 }
 
+int isclosed(int fd) {
+  char c;
+  int value = read(fd,&c,1);
+  if(c<=0 || errno==EBADF) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
+}
+
 void subserver_logic(int client_socket1, int client_socket2){
   printf("Forked!\n");
   char sendtoclient1[256];
@@ -35,6 +46,10 @@ void subserver_logic(int client_socket1, int client_socket2){
   int blockstate = 0;
   int writestate = 2;
   while(1) {
+    //check if other client forfeited
+    if(isclosed(client_socket1))close(client_socket2);
+    if(isclosed(client_socket2))close(client_socket1);
+
     //below is the turn logic when client1s turn
     int n = write(client_socket1, &readstate,sizeof(int));
     err(n,"error setting turn to 1st client when client1 turn");
@@ -95,8 +110,13 @@ int main(int argc, char *argv[] ) {
   while(1) {
     printf("Main server waiting for connection...\n");
     client_socket1 = server_tcp_handshake(listen_socket);
+    int i = 0;
+    int n = write(client_socket1,&i,sizeof(int));
     client_socket2 = server_tcp_handshake(listen_socket);
-    printf("Connection made with client! Forking...\n");
+    i = 1;
+    n = write(client_socket1,&i,sizeof(int));
+    n = write(client_socket2,&i,sizeof(int));
+    printf("Connection made with both clients! Forking...\n");
     pid_t p = fork();
     if(p<0){//error
       perror("fork");
