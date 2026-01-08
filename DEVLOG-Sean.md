@@ -9,5 +9,7 @@ This document must be updated daily every time you finish a work session.
 - uploaded proposal
 - waiting on partner to fix formatting errors in readme
 
-### 2024-01-03 - Brief description
-Expanded description including how much time was spent on task.
+### 2026-01-07 - Basic file setup
+- Creation of files
+- Basic client parser made, waiting on partner to setup sockets
+- Working on prompter and coordinating information sending to server with partner
