@@ -1,4 +1,5 @@
 #include "networking.h"
+#include "game.h"
 #define WRITE 1
 #define WAIT 0
 #define READ 2
@@ -37,9 +38,9 @@ void place_ships(struct Board *b){
           }
           int valid = 3;
           for(int i = 0; i < 3; i++){
-            char col = ships[i][0];
-            int row = ships[i][1];
-            if(ships[i][2] != '\0' || col < 'A' || col > 'C' || row < '1' || row >'3'){
+            char col = ships[i][0]-'A';
+            int row = ships[i][1]-'1';
+            if(ships[i][2] != '\0' || col < 0 || col > 2 || row < 0 || row > 2){
               valid--;
               break;
             }
@@ -55,11 +56,9 @@ void place_ships(struct Board *b){
             continue;
           }
           for(int i = 0; i < 3; i++){
-            char col = ships[i][0];
-            int row = ships[i][1];
-            if(col == 'A') place_ship(&myBoard, 0, row);
-            if(col == 'B') place_ship(&myBoard, 1, row);
-            if(col == 'C') place_ship(&myBoard, 2, row);
+            char col = ships[i][0]-'A';
+            int row = ships[i][1]-'1';
+            place_ship(b, row, col);
           }
           break;
     }
@@ -73,7 +72,6 @@ void clientLogic(int server_socket){
   clear_board(&enemyBoard);
   printf("Both clients connected! Game started.\n");
   place_ships(&myBoard);
-  int row,col;
   while(1){
     int turn;
     int bytes = read(server_socket, &turn, sizeof(int));
@@ -86,12 +84,12 @@ void clientLogic(int server_socket){
       print_board(&enemyBoard);
       printf("Your turn! Enter coordinate to hit (ex B3): ");
       fgets(move, sizeof(move), stdin);
-      if(move[0] < 'A' || move[0] > 'C' ||move[1] < '0' || move[1] > 'C2'){
+      if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
         printf("Invald input. Enter exactly one coordinate in bounds.\n");
         continue;
       }
-      int final_row = move[0] - 'A';
-      int final_row = move[1] - '1';
+      int last_col = move[0] - 'A';
+      int last_row = move[1] - '1';
       write(server_socket, &last_row, sizeof(int));
       write(server_socket, &last_col, sizeof(int));
     }
