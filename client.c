@@ -10,85 +10,95 @@ static void sighandler(int signo) {
   if(server_socket>=0)close(server_socket);
   exit(0);
 }
+void gameover_screen(int won){
+  printf("\n===========\n");
+  if(won) printf("    EZ WIN\n");
+  else printf("U GOT SMOKED\n");
+  printf("\n===========\n");
+}
+void mark_enemyboard(struct Board *b, int row, int col, int hit){
+  if(hit) b->grid[row][col] = 'X';
+  else b->grid[row][col] = 'O'; 
+}
+void place_ships(struct Board *b){
+  char buff[64];
+  char ships[3][3];
+  while(1) {
+        printf("Coordinates are letters for columns and numbers for rows, from A-C and 1-3.\n");
+        printf("Enter 3 Ship Coordinates(seperate by space) ex. A1 B2 C3: ");
+        if(fgets(buff, sizeof(buff), stdin) == NULL){
+          printf("Input error, try again.\n");
+          continue;
+        }
+        int parsed = sscanf(buff,"%2s %2s %2s",ships[0],ships[1],ships[2]); //%2 limits it to two chars in the str
+          if(parsed != 3){
+            printf("Invalid input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
+            continue;
+          }
+          int valid = 3;
+          for(int i = 0; i < 3; i++){
+            char col = ships[i][0];
+            int row = ships[i][1];
+            if(ships[i][2] != '\0' || col < 'A' || col > 'C' || row < '1' || row >'3'){
+              valid--;
+              break;
+            }
+          }
+          if(valid != 3){
+            printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
+            continue;
+          }
+          if( strcmp(ships[0],ships[1]) == 0 
+            || strcmp(ships[2],ships[1]) == 0 
+            ||strcmp(ships[0],ships[2]) == 0 ){
+            printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
+            continue;
+          }
+          for(int i = 0; i < 3; i++){
+            char col = ships[i][0];
+            int row = ships[i][1];
+            if(col == 'A') place_ship(&myBoard, 0, row);
+            if(col == 'B') place_ship(&myBoard, 1, row);
+            if(col == 'C') place_ship(&myBoard, 2, row);
+          }
+          break;
+    }
+    }
+
 
 void clientLogic(int server_socket){
+  struct Board myBoard;
+  struct Board enemyBoard;
+  clear_board(&myBoard);
+  clear_board(&enemyBoard);
   printf("Both clients connected! Game started.\n");
-  int turn;
-  char buffer[256];
-  while(1) {
-    Board myBoard;
-    clear_board(&myBoard);
-    printf("Place your ships!\n");
-    while(1){
-      printf("Coordinates are letters for columns and numbers for rows, from A-C and 1-3.\n");
-      printf("Enter 3 Ship Coordinates(seperate by space) ex. A1 B2 C3: ");
-      char buff[64];
-      if(fgets(buff, sizeof(buff), stdin) == NULL){
-        printf("Input error, try again.\n");
+  place_ships(&myBoard);
+  int row,col;
+  while(1){
+    int turn;
+    int bytes = read(server_socket, &turn, sizeof(int));
+    if(bytes<=0)break;
+    if(turn == WRITE){
+      char move[8];
+      printf("\nYour Board:\n");
+      print_board(&myBoard);
+      printf("\nEnemy Board:\n");
+      print_board(&enemyBoard);
+      printf("Your turn! Enter coordinate to hit (ex B3): ");
+      fgets(move, sizeof(move), stdin);
+      if(move[0] < 'A' || move[0] > 'C' ||move[1] < '0' || move[1] > 'C2'){
+        printf("Invald input. Enter exactly one coordinate in bounds.\n");
         continue;
       }
-      char ships[3][3];
-      int parsed = sscanf(buff,"%2s %2s %2s",ships[0],ships[1],ships[2]); //%2 limits it to two chars in the str
-        if(parsed != 6){
-          printf("Invalid input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
-          continue;
-        }
-        int valid = 3;
-        for(int i = 0; i < 3; i++){
-          int col = ships[i][0];
-          int row = ships[i][1]
-          if(ships[i][2] != '\0' || col < 'A' || col > 'C' || row < '1' || row >'3'){
-            valid--;
-            break;
-          }
-        }
-        if(valid != 3){
-          printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
-          continue;
-        }
-        if(strcmp(ships[0],ships[1]) == 0 || ships[2],ships[1]) == 0 ||ships[0],ships[2]) == 0 ||){
-          printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
-          continue;
-        }
-        for(int i = 0; i < 3; i++){
-          int col = ships[i][0];
-          int row = ships[i][1]
-          if(col == 'A') place_ship(myBoard, 0, row);
-          if(col == 'B') place_ship(myBoard, 1, row);
-          if(col == 'C') place_ship(myBoard, 2, row);
-        }
-        break;
-    }
-
-    int curTurn; //idea for printing that its not your turn
-    int r = read(server_socket,&turn,sizeof(int));
-    err(r,"error reading turn in client");
-
-    if(turn==WRITE) {
-      printf("Enter a message:");
-      if(!fgets(buffer,sizeof(buffer),stdin))break;
-      int w = write(server_socket,buffer,sizeof(buffer));
-      err(w,"write error in clientLogic");
-    }
-
-    else if(turn==WAIT) {
-      continue;
-    }
-
-    else if(turn==READ) {
-      int r = read(server_socket,buffer,sizeof(buffer));
-      err(r,"read error in clientLogic");
-      if(!r)break;
-      printf("Recieved: %s",buffer);
-    }
-    else {
-      printf("TURN ISNT ONE OF THE CHOICES.\n");
-      break;
+      int final_row = move[0] - 'A';
+      int final_row = move[1] - '1';
+      write(server_socket, &last_row, sizeof(int));
+      write(server_socket, &last_col, sizeof(int));
     }
   }
-  printf("Client closed.\n");
+  printf("Game end.\n");
   close(server_socket);
-  exit(99);
+  exit(0);
 }
 
 int main(int argc, char *argv[] ) {
