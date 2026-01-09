@@ -9,6 +9,16 @@ static void sighandler(int signo) {
   exit(0);
 }
 
+// server handles everything, client only displays
+void receive_ships(int sock, struct Board *b){ //takes initial 3 coordinates and places ships there
+  clear_board(b);
+  for(int i = 0; i<3;i++){
+    int row;
+    int col;
+  }
+}
+
+
 char* rot13(char*s) {
   for(int i=0; s[i]&&s[i]!=10;i++) {
     //printf("%d: %d\n",i,s[i]);
@@ -39,6 +49,8 @@ int isclosed(int fd) {
 }
 
 void subserver_logic(int client_socket1, int client_socket2){
+  struct Board Board1;
+  struct Board Board2;
   printf("Forked!\n");
   char sendtoclient1[256];
   char sendtoclient2[256];
@@ -109,14 +121,11 @@ int main(int argc, char *argv[] ) {
     int i = 0;
     int n = write(client_socket1,&i,sizeof(int));
     client_socket2 = server_tcp_handshake(listen_socket);
-<<<<<<< HEAD
     printf("Game 1 made with two clients!\n") //make this print out the pids of both clients soon
-=======
     i = 1;
     n = write(client_socket1,&i,sizeof(int));
     n = write(client_socket2,&i,sizeof(int));
-    printf("Connection made with both clients! Forking...\n");
->>>>>>> 7a7b6b27655c76c2e7c1d40ca44db40ecb0dbaf6
+    printf("Connection made with both clients!\n");
     pid_t p = fork();
     if(p<0){//error
       perror("fork");
