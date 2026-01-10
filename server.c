@@ -1,4 +1,5 @@
 #include "networking.h"
+#include "game.h"
 
 int client_socket1 = -1;
 int client_socket2 = -1;
@@ -15,26 +16,26 @@ void receive_ships(int sock, struct Board *b){ //takes initial 3 coordinates and
   for(int i = 0; i<3;i++){
     int row;
     int col;
+    read(sock,&row,sizeof(int));
+    read(sock,&col,sizeof(int));
+    place_ship(b,row,col);
   }
+
 }
 
-
-char* rot13(char*s) {
-  for(int i=0; s[i]&&s[i]!=10;i++) {
-    //printf("%d: %d\n",i,s[i]);
-    if(s[i]==' ')continue;
-    int lower = s[i] >= 97 ? 1 : 0;
-    int j = (int)s[i]+13;
-    if(lower && j>'z') {
-      s[i]=j-'z'+'a';
-    } else if (!lower && j>'Z') {
-      s[i]=j-'Z'+'A';
-    }
-    else {
-      s[i]=j;
-    }
+int handle_attack(int att, int def, struct Board *b){ //handle from defender side
+  int row,col;
+  read(att, &row,sizeof(int));
+  read(att,&col,sizeof(int));
+  int hit = fire(b,row,col);
+  if(game_over(b)){
+    write(att,"WIN",4);
+    write(def,"LOSE",5);
+    return 1;
   }
-  return s;
+  if(hit) write(att,"HIT",4);
+  else write(att,"MISS",5);
+  return 0;
 }
 
 int isclosed(int fd) {

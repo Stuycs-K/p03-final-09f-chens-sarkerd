@@ -36,6 +36,12 @@ int game_over(struct Board *b){
   return 0;
 }
 
+void gameover_screen(int won){
+  printf("\n===========\n");
+  if(won) printf("    EZ WIN\n");
+  else printf("U GOT SMOKED\n");
+  printf("\n===========\n");
+}
 
 void print_board(struct Board *b){
   printf(" A B C\n");
