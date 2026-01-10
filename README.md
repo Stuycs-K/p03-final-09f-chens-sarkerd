@@ -13,26 +13,29 @@ Server takes clients 2 at a time. The server will block for response from client
 
 client will display bomb/ship screens:
 
-example ship screen:  
- <u>1 2 3</u>   
-A| 0 0 0    
-B| X 0 0   
-C| S S 0  
+example ship screen:   
+. . .    
+X . .   
+S S .  
 
 
 S = ship
-0 = water
+. = water
 X = hit
 
-example bomb screen:  
- <u>1 2 3</u>  
-A| X 0 O  
-B| O 0 0  
-C| 0 X 0  
+example bomb screen:    
+X . O  
+O . .  
+. X .  
 
 X = dead ship 
 O = miss
-0 = Water
+. = Water
+
+[EXTRA FEATURES] (check mark means done, will only do if we have time)
+- bomb special (hit 2 squares with 1 fire)
+- hitting consecutive times (debatable to keep/remove, since the game is kept on a 3x3 it might be unfair and end game too fast)
+- handle multiple games (ex. 2 clients connect, game 1, third client connects and waits for fourth client to start game 2 and so on)
 
 
 
