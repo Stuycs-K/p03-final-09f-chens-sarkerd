@@ -67,32 +67,49 @@ void place_ships(struct Board *b){
 
 
 void clientLogic(int server_socket){
+  int turn;
   struct Board myBoard;
-  //struct Board enemyBoard;
+  struct Board enemyBoard;
   clear_board(&myBoard);
   //clear_board(&enemyBoard);
   printf("Both clients connected! Game started.\n");
+  
   place_ships(&myBoard);
-  while(1){
-    int turn;
+  while(1) {//send board
     int bytes = read(server_socket, &turn, sizeof(int));
-    if(bytes<=0)break;
+    err(bytes,"ERROR SETTING INITIAL TURN");
+    if(turn==WAIT)continue;
+    if(turn==WRITE) {
+      bytes = write(server_socket,&myBoard,sizeof(struct Board));
+      break;
+    }
+  }
+
+  while(1){
+    int bytes = read(server_socket, &turn, sizeof(int));
+    err(bytes,"ERROR SETTING TURN");
+    if(turn==WAIT)continue;
     if(turn == WRITE){
-      char move[8];
-      printf("\nYour Board:\n");
-      print_board(&myBoard);
-      printf("\nEnemy Board:\n");
+      char move[2];
+      printf("\nEnemies Board:\n");
       print_board(&enemyBoard);
       printf("Your turn! Enter coordinate to hit (ex B3): ");
-      fgets(move, sizeof(move), stdin);
+      scanf("%2s",move)
       if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
         printf("Invald input. Enter exactly one coordinate in bounds.\n");
         continue;
       }
-      int last_col = move[0] - 'A';
-      int last_row = move[1] - '1';
-      write(server_socket, &last_row, sizeof(int));
-      write(server_socket, &last_col, sizeof(int));
+      int col_to_attack = move[0] - 'A';
+      int row_to_attack = move[1] - '1';
+
+      write(server_socket, &row_to_attack, sizeof(int));
+      write(server_socket, &col_to_attack, sizeof(int));
+    }
+    if(turn==READ) {
+      //read line would go here to get new your board and new enemy board
+      printf("Here is your board now:\n");
+      print_board(&myBoard);
+      continue;
     }
   }
   printf("Game end.\n");

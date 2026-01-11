@@ -51,20 +51,51 @@ int isclosed(int fd) {
 
 void subserver_logic(int client_socket1, int client_socket2){
   struct Board Board1;
+  struct Board HiddenBoard1;
   struct Board Board2;
+  struct Board HiddenBoard2;
   printf("Forked!\n");
-  char sendtoclient1[256];
-  char sendtoclient2[256];
-  int readstate = 1;
+  int writestate = 1;
   int blockstate = 0;
-  int writestate = 2;
+  int readstate = 2;
+  //SET BOARDS TO BE THE BOARD
+
+  //turn logic for client1 board set
+  int n = write(client_socket1, &writestate,sizeof(int));
+  err(n,"error setting turn to 1st client when client1 turn");
+  n = write(client_socket2, &blockstate,sizeof(int));
+  err(n,"error setting block to 2nd client when client1 turn");
+
+  // Set client1 board
+  n = read(client_socket1,&Board1,sizeof(struct Board));
+  err(n,"error reading client1s initial board");
+  if(!n)exit(9);
+
+  //turn logic for client2 board set
+  int n = write(client_socket1, &blockstate,sizeof(int));
+  err(n,"error setting turn to 1st client when client2 turn");
+  n = write(client_socket2, &writestate,sizeof(int));
+  err(n,"error setting block to 2nd client when client2 turn");
+
+  // Set client2 board
+  n = read(client_socket1,&Board2,sizeof(struct Board));
+  err(n,"error reading client2s initial board");
+  if(!n)exit(9);
+
+  //end off by blocking both clients
+  n = write(client_socket1, &blockstate,sizeof(int));
+  err(n,"error setting turn to 1st client when initial block turn");
+  n = write(client_socket2, &blockstate,sizeof(int));
+  err(n,"error setting turn to 2nd client when initial block turn");
+
   while(1) {
-    //check if other client forfeited
+    /*
     if(isclosed(client_socket1))close(client_socket2);
     if(isclosed(client_socket2))close(client_socket1);
+    */
 
     //below is the turn logic when client1s turn
-    int n = write(client_socket1, &readstate,sizeof(int));
+    int n = write(client_socket1, &writestate,sizeof(int));
     err(n,"error setting turn to 1st client when client1 turn");
     n = write(client_socket2, &blockstate,sizeof(int));
     err(n,"error setting block to 2nd client when client1 turn");
@@ -77,7 +108,7 @@ void subserver_logic(int client_socket1, int client_socket2){
     //below is the turn logic when client2s turn
     n = write(client_socket1, &blockstate,sizeof(int));
     err(n,"error setting block to 1st client when client2 turn");
-    n = write(client_socket2, &readstate,sizeof(int));
+    n = write(client_socket2, &writestate,sizeof(int));
     err(n,"error setting turn to 2nd client when client2 turn");
 
     // read from client2 and rotate response
@@ -86,9 +117,9 @@ void subserver_logic(int client_socket1, int client_socket2){
     if(!n)break;
 
     //set turn to write so clients can read the other clients response
-    n = write(client_socket1, &writestate,sizeof(int));
+    n = write(client_socket1, &readstate,sizeof(int));
     err(n,"error setting turn to 1st client when write turn");
-    n = write(client_socket2, &writestate,sizeof(int));
+    n = write(client_socket2, &readstate,sizeof(int));
     err(n,"error setting turn to 2nd client when write turn");
 
     //write to both clients
