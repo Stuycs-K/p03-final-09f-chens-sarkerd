@@ -19,7 +19,7 @@ void gameover_screen(int won){
 }
 void mark_enemyboard(struct Board *b, int row, int col, int hit){
   if(hit) b->grid[row][col] = 'X';
-  else b->grid[row][col] = 'O'; 
+  else b->grid[row][col] = 'O';
 }
 void place_ships(struct Board *b){
   char buff[64];
@@ -36,6 +36,7 @@ void place_ships(struct Board *b){
             printf("Invalid input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
             continue;
           }
+          //WHOLE THING UP TILL 2ND FOR LOOP IS FOR CHECKING VALIDITY
           int valid = 3;
           for(int i = 0; i < 3; i++){
             char col = ships[i][0]-'A';
@@ -49,8 +50,8 @@ void place_ships(struct Board *b){
             printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
             continue;
           }
-          if( strcmp(ships[0],ships[1]) == 0 
-            || strcmp(ships[2],ships[1]) == 0 
+          if( strcmp(ships[0],ships[1]) == 0
+            || strcmp(ships[2],ships[1]) == 0
             ||strcmp(ships[0],ships[2]) == 0 ){
             printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
             continue;
@@ -67,9 +68,9 @@ void place_ships(struct Board *b){
 
 void clientLogic(int server_socket){
   struct Board myBoard;
-  struct Board enemyBoard;
+  //struct Board enemyBoard;
   clear_board(&myBoard);
-  clear_board(&enemyBoard);
+  //clear_board(&enemyBoard);
   printf("Both clients connected! Game started.\n");
   place_ships(&myBoard);
   while(1){
