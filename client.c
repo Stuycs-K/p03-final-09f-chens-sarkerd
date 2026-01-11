@@ -11,12 +11,6 @@ static void sighandler(int signo) {
   if(server_socket>=0)close(server_socket);
   exit(0);
 }
-void gameover_screen(int won){
-  printf("\n===========\n");
-  if(won) printf("    EZ WIN\n");
-  else printf("U GOT SMOKED\n");
-  printf("\n===========\n");
-}
 void mark_enemyboard(struct Board *b, int row, int col, int hit){
   if(hit) b->grid[row][col] = 'X';
   else b->grid[row][col] = 'O'; 
