@@ -1,8 +1,5 @@
 #include "networking.h"
 #include "game.h"
-#define WRITE 1
-#define WAIT 0
-#define READ 2
 int server_socket = -1;
 int otherclientconnected=0;
 
@@ -15,6 +12,7 @@ void mark_enemyboard(struct Board *b, int row, int col, int hit){
   if(hit) b->grid[row][col] = 'X';
   else b->grid[row][col] = 'O'; 
 }
+
 void place_ships(struct Board *b){
   char buff[64];
   char ships[3][3];
@@ -30,6 +28,7 @@ void place_ships(struct Board *b){
             printf("Invalid input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
             continue;
           }
+          //WHOLE THING UP TILL 2ND FOR LOOP IS FOR CHECKING VALIDITY
           int valid = 3;
           for(int i = 0; i < 3; i++){
             char col = ships[i][0]-'A';
@@ -43,8 +42,8 @@ void place_ships(struct Board *b){
             printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
             continue;
           }
-          if( strcmp(ships[0],ships[1]) == 0 
-            || strcmp(ships[2],ships[1]) == 0 
+          if( strcmp(ships[0],ships[1]) == 0
+            || strcmp(ships[2],ships[1]) == 0
             ||strcmp(ships[0],ships[2]) == 0 ){
             printf("Invald input. Enter exactly 3 unique coordinates in bounds separated by spaces.\n");
             continue;
@@ -60,34 +59,72 @@ void place_ships(struct Board *b){
 
 
 void clientLogic(int server_socket){
+  int turn;
+  int gameState;
   struct Board myBoard;
   struct Board enemyBoard;
   clear_board(&myBoard);
-  clear_board(&enemyBoard);
+  //clear_board(&enemyBoard);
   printf("Both clients connected! Game started.\n");
+
   place_ships(&myBoard);
-  while(1){
-    int turn;
+  while(1) {//send board
     int bytes = read(server_socket, &turn, sizeof(int));
-    if(bytes<=0)break;
+    err(bytes,"ERROR SETTING INITIAL TURN");
+    if(turn==WAIT)continue;
+    if(turn==WRITE) {
+      bytes = write(server_socket,&myBoard,sizeof(struct Board));
+      turn=WAIT;
+      break;
+    }
+  }
+
+  while(1){
+    int bytes = read(server_socket, &turn, sizeof(int));
+    err(bytes,"ERROR SETTING TURN");
+    if(turn==WAIT)continue;
+
     if(turn == WRITE){
-      char move[8];
-      printf("\nYour Board:\n");
-      print_board(&myBoard);
-      printf("\nEnemy Board:\n");
+      char move[2];
+      printf("\nEnemies Board:\n");
       print_board(&enemyBoard);
       printf("Your turn! Enter coordinate to hit (ex B3): ");
-      fgets(move, sizeof(move), stdin);
+      scanf("%2s",move)
       if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
         printf("Invald input. Enter exactly one coordinate in bounds.\n");
         continue;
       }
-      int last_col = move[0] - 'A';
-      int last_row = move[1] - '1';
-      write(server_socket, &last_row, sizeof(int));
-      write(server_socket, &last_col, sizeof(int));
+
+      bytes = write(server_socket, &move, sizeof(move));
+      err(bytes,"ERROR WRITING MOVE TO SERVER");
+    }
+
+    if(turn==READ) {
+      bytes = read(server_socket,&myBoard,sizeof(struct Board));
+      err(bytes,"ERROR READING MYBOARD");
+      bytes = read(server_socket,&enemyBoard,sizeof(struct Board));
+      err(bytes,"ERROR READING ENEMYBOARD");
+
+      printf("Here is your board now:\n");
+      print_board(&myBoard);
+      continue;
     }
   }
+
+  if(turn==CHECK) {
+      bytes = read(server_socket,&gameState,sizeof(int));
+      err(bytes,"ERROR CHECKING");
+      if(gameState==LOSE) {
+        printf("You lost!\n");
+        break;
+      }
+      if(gameState==WIN) {
+        printf("You won!\n");
+        break;
+      }
+      else continue;
+  }
+
   printf("Game end.\n");
   close(server_socket);
   exit(0);

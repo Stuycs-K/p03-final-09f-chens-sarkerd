@@ -3,6 +3,16 @@
 
 int client_socket1 = -1;
 int client_socket2 = -1;
+int writestate = WRITE;
+int waitstate = WAIT;
+int readstate = READ;
+int checkstate = CHECK;
+struct Board Board1;
+struct Board HiddenBoard1;
+struct Board Board2;
+struct Board HiddenBoard2;
+char c1move[2];
+char c2move[2];
 
 static void sighandler(int signo) {
   if(client_socket1>=0)close(client_socket1);
@@ -10,32 +20,19 @@ static void sighandler(int signo) {
   exit(0);
 }
 
-// server handles everything, client only displays
-void receive_ships(int sock, struct Board *b){ //takes initial 3 coordinates and places ships there
-  clear_board(b);
-  for(int i = 0; i<3;i++){
-    int row;
-    int col;
-    read(sock,&row,sizeof(int));
-    read(sock,&col,sizeof(int));
-    place_ship(b,row,col);
-  }
-
+void HideBoard(struct Board *Board, struct Board *HiddenBoard) {
+  for (int i = 0; i < 3; i++) {
+    for (int j = 0; j < 3; j++) {
+        HiddenBoard->grid[i][j] = Board->grid[i][j];
+        if(HiddenBoard->grid[i][j]=="S")HiddenBoard->grid[i][j]='.';
+    }
+}
 }
 
-int handle_attack(int att, int def, struct Board *b){ //handle from defender side
-  int row,col;
-  read(att, &row,sizeof(int));
-  read(att,&col,sizeof(int));
+void handle_attack(char* move, struct Board *b){
+  int row = move[1]-'1';
+  int col = move[0]-'A';
   int hit = fire(b,row,col);
-  if(game_over(b)){
-    write(att,"WIN",4);
-    write(def,"LOSE",5);
-    return 1;
-  }
-  if(hit) write(att,"HIT",4);
-  else write(att,"MISS",5);
-  return 0;
 }
 
 int isclosed(int fd) {
@@ -49,58 +46,161 @@ int isclosed(int fd) {
   }
 }
 
-void subserver_logic(int client_socket1, int client_socket2){
-  struct Board Board1;
-  struct Board Board2;
+int isGameOver(struct Board *Board1, struct Board *Board2) {
+  int lose = LOSE;
+  int win = WIN;
+  int none = NONE;
+  int n;
+  if(game_over(Board1)) {//if client1 lost
+    n = write(client_socket1, &checkstate,sizeof(int));
+    err(n,"error setting turn to 1st client when client1 loses");
+    n = write(client_socket2, &checkstate,sizeof(int));
+    err(n,"error setting turn to 2nd client when client1 loses");
+    printf("Client 2 Wins.\n");
+    write(client_socket1,&lose,sizeof(int));
+    write(client_socket2,&win,sizeof(int));
+    close(client_socket1);
+    close(client_socket2);
+    return 1;
+  }
+  if(game_over(Board2)) {//if client2 lost
+    n = write(client_socket1, &checkstate,sizeof(int));
+    err(n,"error setting turn to 1st client when client2 loses");
+    n = write(client_socket2, &checkstate,sizeof(int));
+    err(n,"error setting turn to 2nd client when client2 loses");
+    printf("Client 1 Wins.\n");
+    write(client_socket1,&win,sizeof(int));
+    write(client_socket2,&lose,sizeof(int));
+    close(client_socket1);
+    close(client_socket2);
+    return 1;
+  }
+  else {//if neither lost
+    n = write(client_socket1, &checkstate,sizeof(int));
+    err(n,"error setting turn to 1st client when neither loses");
+    n = write(client_socket2, &checkstate,sizeof(int));
+    err(n,"error setting turn to 2nd client when neither loses");
+    write(client_socket1,&none,sizeof(int));
+    write(client_socket2,&none,sizeof(int));
+    n = write(client_socket1, &waitstate,sizeof(int));
+    err(n,"error setting turn to 1st client when block turn | CHECK");
+    n = write(client_socket2, &waitstate,sizeof(int));
+    err(n,"error setting turn to 2nd client when block turn | CHECK");
+    return 0;
+  }
+}
+
+void gameSetupServer() {
+  //turn logic for client1 board set
+  int n = write(client_socket1, &writestate,sizeof(int));
+  err(n,"error setting turn to 1st client when client1 turn");
+  n = write(client_socket2, &waitstate,sizeof(int));
+  err(n,"error setting block to 2nd client when client1 turn");
+
+  // Set client1 board
+  n = read(client_socket1,&Board1,sizeof(struct Board));
+  err(n,"error reading client1s initial board");
+  if(!n)exit(9);
+
+  //turn logic for client2 board set
+  int n = write(client_socket1, &waitstate,sizeof(int));
+  err(n,"error setting turn to 1st client when client2 turn");
+  n = write(client_socket2, &writestate,sizeof(int));
+  err(n,"error setting block to 2nd client when client2 turn");
+
+  // Set client2 board
+  n = read(client_socket1,&Board2,sizeof(struct Board));
+  err(n,"error reading client2s initial board");
+  if(!n)exit(9);
+
+  //set turn to read for both so u can write the enemy boards
+  n = write(client_socket1, &readstate,sizeof(int));
+  err(n,"error setting turn to 1st client when initial board read turn");
+  n = write(client_socket2, &readstate,sizeof(int));
+  err(n,"error setting turn to 2nd client when initial board read turn");
+
+  //HIDE boards
+  HideBoard(&Board1,&HiddenBoard1);
+  HideBoard(&Board2,&HiddenBoard2);
+
+  //WRITE HIDDEN BOARD TO RESPECTIVE BOARDS
+  n = write(client_socket1,&HiddenBoard2,sizeof(struct Board));
+  err(byte,"initial subserver_logic write client2 board to client1");
+  n = write(client_socket2,&HiddenBoard1,sizeof(struct Board));
+  err(byte,"initial subserver_logic write client2 board to client1");
+
+  //end off by blocking both clients
+  n = write(client_socket1, &waitstate,sizeof(int));
+  err(n,"error setting turn to 1st client when initial block turn");
+  n = write(client_socket2, &waitstate,sizeof(int));
+  err(n,"error setting turn to 2nd client when initial block turn");
+}
+
+
+void subserver_logic(){
   printf("Forked!\n");
-  char sendtoclient1[256];
-  char sendtoclient2[256];
-  int readstate = 1;
-  int blockstate = 0;
-  int writestate = 2;
+
+  gameSetupServer();
+
   while(1) {
-    //check if other client forfeited
+    /*
     if(isclosed(client_socket1))close(client_socket2);
     if(isclosed(client_socket2))close(client_socket1);
+    */
 
     //below is the turn logic when client1s turn
-    int n = write(client_socket1, &readstate,sizeof(int));
+    int n = write(client_socket1, &writestate,sizeof(int));
     err(n,"error setting turn to 1st client when client1 turn");
-    n = write(client_socket2, &blockstate,sizeof(int));
+    n = write(client_socket2, &waitstate,sizeof(int));
     err(n,"error setting block to 2nd client when client1 turn");
 
-    // read from client1 and rotate response
-    n = read(client_socket1,sendtoclient2,sizeof(sendtoclient2));
-    err(n,"error reading client1 initial");
+    // read from client1 and attack
+    n = read(client_socket1,c1move,sizeof(c1move));
+    err(n,"error reading client1s move");
     if(!n)break;
 
+    handle_attack(c1move,&Board2);
+
+    if(isGameOver(&Board1,&Board2)) break;
+
     //below is the turn logic when client2s turn
-    n = write(client_socket1, &blockstate,sizeof(int));
-    err(n,"error setting block to 1st client when client2 turn");
-    n = write(client_socket2, &readstate,sizeof(int));
+    n = write(client_socket1, &waitstate,sizeof(int));
+    err(n,"error setting turn to 1st client when client2 turn");
+    n = write(client_socket2, &writestate,sizeof(int));
     err(n,"error setting turn to 2nd client when client2 turn");
 
     // read from client2 and rotate response
-    n = read(client_socket2,sendtoclient1,sizeof(sendtoclient1));
-    err(n,"error reading client2 initial");
+    n = read(client_socket2,c2move,sizeof(c2move));
+    err(n,"error reading client2s move");
     if(!n)break;
 
-    //set turn to write so clients can read the other clients response
-    n = write(client_socket1, &writestate,sizeof(int));
+    handle_attack(c2move,&Board1);
+    if(isGameOver(&Board1,&Board2)) break;
+
+    //set turn to read for both so u can write the new boards
+    n = write(client_socket1, &readstate,sizeof(int));
     err(n,"error setting turn to 1st client when write turn");
-    n = write(client_socket2, &writestate,sizeof(int));
+    n = write(client_socket2, &readstate,sizeof(int));
     err(n,"error setting turn to 2nd client when write turn");
 
+    //HIDE boards
+    HideBoard(&Board1,&HiddenBoard1);
+    HideBoard(&Board2,&HiddenBoard2);
+
     //write to both clients
-    int byte = write(client_socket1,sendtoclient1,sizeof(sendtoclient1));
-    err(byte,"subserver_logic write to client 1 error");
-    byte = write(client_socket2,sendtoclient2,sizeof(sendtoclient2));
-    err(byte,"subserver_logic write to client 2 error");
+    int byte = write(client_socket1,&Board1,sizeof(struct Board));
+    err(byte,"subserver_logic write client1 board to client1");
+    byte = write(client_socket1,&HiddenBoard2,sizeof(struct Board));
+    err(byte,"subserver_logic write client2 board to client1");
+    byte = write(client_socket2,&Board2,sizeof(struct Board));
+    err(byte,"subserver_logic write client2 board to client2");
+    byte = write(client_socket2,&HiddenBoard1,sizeof(struct Board));
+    err(byte,"subserver_logic write client1 board to client2");
 
     //end off by blocking both clients
-    n = write(client_socket1, &blockstate,sizeof(int));
+    n = write(client_socket1, &waitstate,sizeof(int));
     err(n,"error setting turn to 1st client when block turn");
-    n = write(client_socket2, &blockstate,sizeof(int));
+    n = write(client_socket2, &waitstate,sizeof(int));
     err(n,"error setting turn to 2nd client when block turn");
     continue;
   }
@@ -142,7 +242,7 @@ int main(int argc, char *argv[] ) {
       continue;
     }
     //child/subserver does
-    subserver_logic(client_socket1,client_socket2);
+    subserver_logic();
     continue;
   }
 
