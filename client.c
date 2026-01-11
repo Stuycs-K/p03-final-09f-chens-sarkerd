@@ -11,12 +11,7 @@ static void sighandler(int signo) {
   if(server_socket>=0)close(server_socket);
   exit(0);
 }
-void gameover_screen(int won){
-  printf("\n===========\n");
-  if(won) printf("    EZ WIN\n");
-  else printf("U GOT SMOKED\n");
-  printf("\n===========\n");
-}
+
 void mark_enemyboard(struct Board *b, int row, int col, int hit){
   if(hit) b->grid[row][col] = 'X';
   else b->grid[row][col] = 'O';
@@ -73,7 +68,7 @@ void clientLogic(int server_socket){
   clear_board(&myBoard);
   //clear_board(&enemyBoard);
   printf("Both clients connected! Game started.\n");
-  
+
   place_ships(&myBoard);
   while(1) {//send board
     int bytes = read(server_socket, &turn, sizeof(int));
@@ -81,6 +76,7 @@ void clientLogic(int server_socket){
     if(turn==WAIT)continue;
     if(turn==WRITE) {
       bytes = write(server_socket,&myBoard,sizeof(struct Board));
+      turn=WAIT;
       break;
     }
   }
@@ -99,14 +95,14 @@ void clientLogic(int server_socket){
         printf("Invald input. Enter exactly one coordinate in bounds.\n");
         continue;
       }
-      int col_to_attack = move[0] - 'A';
-      int row_to_attack = move[1] - '1';
 
-      write(server_socket, &row_to_attack, sizeof(int));
-      write(server_socket, &col_to_attack, sizeof(int));
+      bytes = write(server_socket, &move, sizeof(move));
+      err(bytes,"ERROR WRITING MOVE TO SERVER");
     }
     if(turn==READ) {
-      //read line would go here to get new your board and new enemy board
+      bytes = read(server_socket,&myBoard,sizeof(struct Board));
+      bytes = read(server_socket,&enemyBoard,sizeof(struct Board));
+
       printf("Here is your board now:\n");
       print_board(&myBoard);
       continue;
