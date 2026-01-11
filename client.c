@@ -12,10 +12,6 @@ static void sighandler(int signo) {
   exit(0);
 }
 
-void mark_enemyboard(struct Board *b, int row, int col, int hit){
-  if(hit) b->grid[row][col] = 'X';
-  else b->grid[row][col] = 'O';
-}
 void place_ships(struct Board *b){
   char buff[64];
   char ships[3][3];
