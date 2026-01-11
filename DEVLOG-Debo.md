@@ -23,11 +23,6 @@ This document must be updated daily every time you finish a work session.
 - Made sure client knows when the other client connects
 - Time Taken: 40 minutes
 
-### 2024-01-08 - Win lose status first idea
-- Started on win/lose status but couldn't get it working
-- Made sure client knows when the other client connects
-- Time Taken: 40 minutes
-
 ### 2024-01-10 (Commits made on early 1/11 though) - Make socket compatible with game
 - Removed redundant code
 - Fixed/Recoded alot of client code b/c didn't work for our idea
