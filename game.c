@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "game.h"
 void clear_board(struct Board *b){
   b->ships_remaining = 0;
@@ -45,4 +46,8 @@ void print_board(struct Board *b){
     }
     printf("\n");
   }
+}
+
+int main(){
+  return 0;
 }

@@ -24,7 +24,7 @@ void HideBoard(struct Board *Board, struct Board *HiddenBoard) {
   for (int i = 0; i < 3; i++) {
     for (int j = 0; j < 3; j++) {
         HiddenBoard->grid[i][j] = Board->grid[i][j];
-        if(HiddenBoard->grid[i][j]=="S")HiddenBoard->grid[i][j]='.';
+        if(HiddenBoard->grid[i][j]=='S')HiddenBoard->grid[i][j]='.';
     }
 }
 }
@@ -103,7 +103,7 @@ void gameSetupServer() {
   if(!n)exit(9);
 
   //turn logic for client2 board set
-  int n = write(client_socket1, &waitstate,sizeof(int));
+  n = write(client_socket1, &waitstate,sizeof(int));
   err(n,"error setting turn to 1st client when client2 turn");
   n = write(client_socket2, &writestate,sizeof(int));
   err(n,"error setting block to 2nd client when client2 turn");
@@ -125,9 +125,9 @@ void gameSetupServer() {
 
   //WRITE HIDDEN BOARD TO RESPECTIVE BOARDS
   n = write(client_socket1,&HiddenBoard2,sizeof(struct Board));
-  err(byte,"initial subserver_logic write client2 board to client1");
+  err(n,"initial subserver_logic write client2 board to client1");
   n = write(client_socket2,&HiddenBoard1,sizeof(struct Board));
-  err(byte,"initial subserver_logic write client2 board to client1");
+  err(n,"initial subserver_logic write client2 board to client1");
 
   //end off by blocking both clients
   n = write(client_socket1, &waitstate,sizeof(int));
@@ -219,10 +219,10 @@ int main(int argc, char *argv[] ) {
   while(1) {
     printf("Main server waiting for connection...\n");
     client_socket1 = server_tcp_handshake(listen_socket);
-    int i = 0;
+    int i = 1;
     int n = write(client_socket1,&i,sizeof(int));
     client_socket2 = server_tcp_handshake(listen_socket);
-    printf("Game 1 made with two clients!\n") //make this print out the pids of both clients soon
+    printf("Game 1 made with two clients!\n");
     i = 1;
     n = write(client_socket1,&i,sizeof(int));
     n = write(client_socket2,&i,sizeof(int));
@@ -245,5 +245,5 @@ int main(int argc, char *argv[] ) {
     subserver_logic();
     continue;
   }
-
+  return 0;
 }

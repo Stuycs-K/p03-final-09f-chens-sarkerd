@@ -10,7 +10,7 @@ static void sighandler(int signo) {
 }
 void mark_enemyboard(struct Board *b, int row, int col, int hit){
   if(hit) b->grid[row][col] = 'X';
-  else b->grid[row][col] = 'O'; 
+  else b->grid[row][col] = 'O';
 }
 
 void place_ships(struct Board *b){
@@ -89,7 +89,7 @@ void clientLogic(int server_socket){
       printf("\nEnemies Board:\n");
       print_board(&enemyBoard);
       printf("Your turn! Enter coordinate to hit (ex B3): ");
-      scanf("%2s",move)
+      scanf("%2s",move);
       if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
         printf("Invald input. Enter exactly one coordinate in bounds.\n");
         continue;
@@ -112,17 +112,14 @@ void clientLogic(int server_socket){
   }
 
   if(turn==CHECK) {
-      bytes = read(server_socket,&gameState,sizeof(int));
+      int bytes = read(server_socket,&gameState,sizeof(int));
       err(bytes,"ERROR CHECKING");
       if(gameState==LOSE) {
         printf("You lost!\n");
-        break;
       }
       if(gameState==WIN) {
         printf("You won!\n");
-        break;
       }
-      else continue;
   }
 
   printf("Game end.\n");

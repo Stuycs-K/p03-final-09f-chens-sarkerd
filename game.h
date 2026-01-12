@@ -2,7 +2,7 @@
 #define GAME_H
 #define LOSE 999
 #define WIN 888
-#define NEITHER 555
+#define NONE 555
 #define WRITE 1
 #define WAIT 0
 #define READ 2
