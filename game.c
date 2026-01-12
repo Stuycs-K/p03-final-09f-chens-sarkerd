@@ -47,7 +47,3 @@ void print_board(struct Board *b){
     printf("\n");
   }
 }
-
-int main(){
-  return 0;
-}
