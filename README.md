@@ -36,20 +36,21 @@ O = miss
 - bomb special (hit 2 squares with 1 fire)
 - hitting consecutive times (debatable to keep/remove, since the game is kept on a 3x3 it might be unfair and end game too fast)
 - handle multiple games (ex. 2 clients connect, game 1, third client connects and waits for fourth client to start game 2 and so on)
+- handle early disconnects (win by default)
 
 
 
 ### Instructions:
 
-[WILL CHANGE WITH DEVELOPMENT]
+open a server.
 
-first client(P1) hosts the server. 
+first client(P1) connects to server. 
 
 second client(P2) connects to server. 
 
 client prompts for the two ship locations, one at a time. players type in where the ships are. 
 
-client prompts for bomb location, one at a time. players type in where they want to drop the bomb, and the client will show different symbols depending on if it hits or misses. 
+client prompts for bomb location, one at a time. players type in where they want to drop the bomb, and the client will show different symbols depending on if it hits or misses. regular battleship rules, except on a smaller grid. 
 
 ### Resources/ References:
 
