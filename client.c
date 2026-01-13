@@ -85,7 +85,7 @@ void clientLogic(int server_socket){
     if(turn==WAIT)continue;
 
     if(turn == WRITE){
-      char move[2];
+      char move[3];
       printf("\nEnemies Board:\n");
       print_board(&enemyBoard);
       printf("Your turn! Enter coordinate to hit (ex B3): ");
