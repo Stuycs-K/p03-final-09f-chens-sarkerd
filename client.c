@@ -65,8 +65,6 @@ void clientLogic(int server_socket){
   struct Board enemyBoard;
   clear_board(&myBoard);
   clear_board(&enemyBoard);
-  printf("Both clients connected! Game started.\n");
-
   place_ships(&myBoard);
   while(1) {//send board
     int bytes = read(server_socket, &turn, sizeof(int));

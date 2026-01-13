@@ -219,7 +219,7 @@ int main(int argc, char *argv[] ) {
   while(1) {
     printf("Main server waiting for connection...\n");
     client_socket1 = server_tcp_handshake(listen_socket);
-    int i = 1;
+    int i = 0;
     int n = write(client_socket1,&i,sizeof(int));
     client_socket2 = server_tcp_handshake(listen_socket);
     printf("Game 1 made with two clients!\n");
