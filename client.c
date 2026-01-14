@@ -3,6 +3,8 @@
 int server_socket = -1;
 int otherclientconnected=0;
 
+//problem is that turn is setting to 555 when its supposed to be gamestate, so i think that is making it a bit wonky also need to test win/lose con but the game is working
+
 static void sighandler(int signo) {
   printf("Client closed.\n");
   if(server_socket>=0)close(server_socket);
