@@ -10,6 +10,24 @@ static void sighandler(int signo) {
   if(server_socket>=0)close(server_socket);
   exit(0);
 }
+
+void turner(int turn) {
+  switch(turn) {
+    case WAIT:
+      printf("turn: WAIT\n");
+      break;
+    case READ:
+      printf("turn: READ\n");
+      break;
+    case WRITE:
+      printf("turn: WRITE\n");
+      break;
+    case CHECK:
+      printf("turn: CHECK\n");
+      break;
+  }
+}
+
 void mark_enemyboard(struct Board *b, int row, int col, int hit){
   if(hit) b->grid[row][col] = 'X';
   else b->grid[row][col] = 'O';
@@ -78,8 +96,8 @@ void clientLogic(int server_socket){
     err(bytes,"idk starting read loop\n");
   }
   place_ships(&myBoard);
-  printf("board rn initial send\n");
-  print_board(&myBoard);
+  //printf("board rn initial send\n");
+  //print_board(&myBoard);
   bytes = write(server_socket,&myBoard,sizeof(struct Board));
   turn=WAIT;
   printf("Successfuly sent initial board!\n");
@@ -100,7 +118,7 @@ void clientLogic(int server_socket){
     bytes = read(server_socket, &turn, sizeof(int));
     err(bytes,"ERROR SETTING TURN");
     if(!bytes)break;
-    //printf("turn: %d\n",turn);
+    turner(turn);
     if(turn==WAIT){
       //printf("wait loop\n");
       continue;
@@ -128,19 +146,20 @@ void clientLogic(int server_socket){
 
       printf("Here is your board now:\n");
       print_board(&myBoard);
+      turn = WAIT;
       continue;
     }
-  }
 
-  if(turn==CHECK) {
-      bytes = read(server_socket,&gameState,sizeof(int));
-      err(bytes,"ERROR CHECKING");
-      if(gameState==LOSE) {
-        printf("You lost!\n");
-      }
-      if(gameState==WIN) {
-        printf("You won!\n");
-      }
+    if(turn==CHECK) {
+        bytes = read(server_socket,&gameState,sizeof(int));
+        err(bytes,"ERROR CHECKING");
+        if(gameState==LOSE) {
+          printf("You lost!\n");
+        }
+        if(gameState==WIN) {
+          printf("You won!\n");
+        }
+    }
   }
 
   printf("Game end.\n");
