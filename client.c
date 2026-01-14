@@ -78,17 +78,17 @@ void clientLogic(int server_socket){
     err(bytes,"idk starting read loop\n");
   }
   place_ships(&myBoard);
-  printf("board rn initial send\n");
+  printf("Ships set!\n");
   print_board(&myBoard);
   bytes = write(server_socket,&myBoard,sizeof(struct Board));
   turn=WAIT;
   printf("Successfuly sent initial board!\n");
 
   bytes = read(server_socket,&turn,sizeof(int));
-  err(bytes,"idk starting read to set enemy board\n");
+  err(bytes,"problem reading enemy board\n");
   while(turn==WAIT) {
     bytes = read(server_socket,&turn,sizeof(int));
-    err(bytes,"idk starting read loop 4 setting enemy board\n");
+    err(bytes,"problem storing enemy board \n");
   }
   bytes = read(server_socket,&enemyBoard,sizeof(struct Board));
   //printf("enemy board rn:");

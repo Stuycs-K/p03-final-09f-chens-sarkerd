@@ -157,7 +157,6 @@ void gameSetupServer() {
 
 
 void subserver_logic(){
-  printf("Forked!\n");
 
   gameSetupServer();
 
