@@ -26,4 +26,15 @@ This document must be updated daily every time you finish a work session.
 - worked with partner (on his side) to work on server message handling and handling closing client, discussed each other's code to figure out how to coordinate
 
 ### 2026-01-11 - Small bug fixing, updated readme
-- worked with partner on call to make bug fixes, update readme 
+- worked with partner on call to make bug fixes, update readme
+
+### 2026-01-12 - MORE bug fixing
+- partner merged with main, crazy amount bugs in client and server, reading/writing errors mainly but also some bad functions
+- fixed all of them, and then also updated makefile (previously used terminal to compile)
+
+### 2026-01-13 - more bug fixing... again
+- worked with partner on call to make bug fixes, AGAIN
+- problem this time was something about the struct being read by the server wrong and then printing a char that looks like <?>
+
+### 2026-01-14 - implementing game end
+- working on handling client disconnect win by default
