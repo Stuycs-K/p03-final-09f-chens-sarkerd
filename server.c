@@ -27,6 +27,10 @@ void HideBoard(struct Board *Board, struct Board *HiddenBoard) {
         if(HiddenBoard->grid[i][j]=='S')HiddenBoard->grid[i][j]='.';
     }
 }
+printf("BOARD:\n");
+print_board(Board);
+printf("HIDDENBOARD:\n");
+print_board(HiddenBoard);
 }
 
 void handle_attack(char* move, struct Board *b){
@@ -101,17 +105,25 @@ void gameSetupServer() {
   n = read(client_socket1,&Board1,sizeof(struct Board));
   err(n,"error reading client1s initial board");
   if(!n)exit(9);
+  //printf("c1 board rn initial\n");
+  //print_board(&Board1);
 
   //turn logic for client2 board set
   n = write(client_socket1, &waitstate,sizeof(int));
   err(n,"error setting turn to 1st client when client2 turn");
   n = write(client_socket2, &writestate,sizeof(int));
   err(n,"error setting block to 2nd client when client2 turn");
+  //printf("GOT HERE\n");
 
   // Set client2 board
-  n = read(client_socket1,&Board2,sizeof(struct Board));
+  n = read(client_socket2,&Board2,sizeof(struct Board));
   err(n,"error reading client2s initial board");
   if(!n)exit(9);
+  //printf("GOT HERE 2\n");
+  //printf("c2 board rn initial\n");
+  //print_board(&Board2);
+
+  //NOTE TO SELF INITIALS WORK SO EVERYTHING ABOVE WORKS 100%
 
   //set turn to read for both so u can write the enemy boards
   n = write(client_socket1, &readstate,sizeof(int));
@@ -122,6 +134,11 @@ void gameSetupServer() {
   //HIDE boards
   HideBoard(&Board1,&HiddenBoard1);
   HideBoard(&Board2,&HiddenBoard2);
+  printf("Hidden board1 rn\n");
+  print_board(&HiddenBoard1);
+  printf("Hidden board2 rn\n");
+  print_board(&HiddenBoard2);
+
 
   //WRITE HIDDEN BOARD TO RESPECTIVE BOARDS
   n = write(client_socket1,&HiddenBoard2,sizeof(struct Board));
@@ -134,6 +151,8 @@ void gameSetupServer() {
   err(n,"error setting turn to 1st client when initial block turn");
   n = write(client_socket2, &waitstate,sizeof(int));
   err(n,"error setting turn to 2nd client when initial block turn");
+
+  printf("Finish setup\n");
 }
 
 
@@ -186,6 +205,14 @@ void subserver_logic(){
     //HIDE boards
     HideBoard(&Board1,&HiddenBoard1);
     HideBoard(&Board2,&HiddenBoard2);
+    printf("Hidden board1 rn\n");
+    print_board(&HiddenBoard1);
+    printf("Hidden board2 rn\n");
+    print_board(&HiddenBoard2);
+    printf("Board1 rn\n");
+    print_board(&Board1);
+    printf("Board2 rn\n");
+    print_board(&Board2);
 
     //write to both clients
     int byte = write(client_socket1,&Board1,sizeof(struct Board));
@@ -220,9 +247,9 @@ int main(int argc, char *argv[] ) {
     printf("Main server waiting for connection...\n");
     client_socket1 = server_tcp_handshake(listen_socket);
     int i = 0;
+    printf("One client connected!\n");
     int n = write(client_socket1,&i,sizeof(int));
     client_socket2 = server_tcp_handshake(listen_socket);
-    printf("Game 1 made with two clients!\n");
     i = 1;
     n = write(client_socket1,&i,sizeof(int));
     n = write(client_socket2,&i,sizeof(int));

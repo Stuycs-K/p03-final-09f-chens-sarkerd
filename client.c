@@ -55,33 +55,54 @@ void place_ships(struct Board *b){
           }
           break;
     }
+    //printf("board rn placeship\n");
+    //print_board(b);
     }
 
 
 void clientLogic(int server_socket){
+  printf("Game started!\n");
   int turn;
   int gameState;
   struct Board myBoard;
   struct Board enemyBoard;
   clear_board(&myBoard);
   clear_board(&enemyBoard);
-  place_ships(&myBoard);
-  while(1) {//send board
-    int bytes = read(server_socket, &turn, sizeof(int));
-    err(bytes,"ERROR SETTING INITIAL TURN");
-    if(turn==WAIT)continue;
-    if(turn==WRITE) {
-      bytes = write(server_socket,&myBoard,sizeof(struct Board));
-      turn=WAIT;
-      break;
-    }
+  int bytes = read(server_socket,&turn,sizeof(int));
+  err(bytes,"idk starting read\n");
+  if(turn==WAIT)printf("Wait til it is your turn to set ships\n");
+  while(turn==WAIT) {
+    bytes = read(server_socket,&turn,sizeof(int));
+    err(bytes,"idk starting read loop\n");
   }
+  place_ships(&myBoard);
+  printf("board rn initial send\n");
+  print_board(&myBoard);
+  bytes = write(server_socket,&myBoard,sizeof(struct Board));
+  turn=WAIT;
+  printf("Successfuly sent initial board!\n");
+
+  bytes = read(server_socket,&turn,sizeof(int));
+  err(bytes,"idk starting read to set enemy board\n");
+  while(turn==WAIT) {
+    bytes = read(server_socket,&turn,sizeof(int));
+    err(bytes,"idk starting read loop 4 setting enemy board\n");
+  }
+  bytes = read(server_socket,&enemyBoard,sizeof(struct Board));
+  //printf("enemy board rn:");
+  //print_board(&enemyBoard);
+
+  //NOTE: EVERYTHING ABOVE WORKS
 
   while(1){
-    int bytes = read(server_socket, &turn, sizeof(int));
+    bytes = read(server_socket, &turn, sizeof(int));
     err(bytes,"ERROR SETTING TURN");
-    if(turn==WAIT)continue;
-
+    if(!bytes)break;
+    //printf("turn: %d\n",turn);
+    if(turn==WAIT){
+      //printf("wait loop\n");
+      continue;
+    }
     if(turn == WRITE){
       char move[3];
       printf("\nEnemies Board:\n");
@@ -110,7 +131,7 @@ void clientLogic(int server_socket){
   }
 
   if(turn==CHECK) {
-      int bytes = read(server_socket,&gameState,sizeof(int));
+      bytes = read(server_socket,&gameState,sizeof(int));
       err(bytes,"ERROR CHECKING");
       if(gameState==LOSE) {
         printf("You lost!\n");
@@ -139,6 +160,7 @@ int main(int argc, char *argv[] ) {
   while(!otherclientconnected) {
     n = read(server_socket,&otherclientconnected,sizeof(int));
     err(n,"loop otherclientconnected setup");
+    if(!n)printf("BRUH.\n");
   }
   clientLogic(server_socket);
 
