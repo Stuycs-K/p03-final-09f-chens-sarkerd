@@ -27,10 +27,10 @@ void HideBoard(struct Board *Board, struct Board *HiddenBoard) {
         if(HiddenBoard->grid[i][j]=='S')HiddenBoard->grid[i][j]='.';
     }
 }
-printf("BOARD:\n");
-print_board(Board);
-printf("HIDDENBOARD:\n");
-print_board(HiddenBoard);
+//printf("BOARD:\n");
+//print_board(Board);
+//printf("HIDDENBOARD:\n");
+//print_board(HiddenBoard);
 }
 
 void handle_attack(char* move, struct Board *b){
@@ -204,14 +204,14 @@ void subserver_logic(){
     //HIDE boards
     HideBoard(&Board1,&HiddenBoard1);
     HideBoard(&Board2,&HiddenBoard2);
-    printf("Hidden board1 rn\n");
-    print_board(&HiddenBoard1);
-    printf("Hidden board2 rn\n");
-    print_board(&HiddenBoard2);
-    printf("Board1 rn\n");
-    print_board(&Board1);
-    printf("Board2 rn\n");
-    print_board(&Board2);
+    //printf("Hidden board1 rn\n");
+    //print_board(&HiddenBoard1);
+    //printf("Hidden board2 rn\n");
+    //print_board(&HiddenBoard2);
+    //printf("Board1 rn\n");
+    //print_board(&Board1);
+    //printf("Board2 rn\n");
+    //print_board(&Board2);
 
     //write to both clients
     int byte = write(client_socket1,&Board1,sizeof(struct Board));
@@ -223,11 +223,11 @@ void subserver_logic(){
     byte = write(client_socket2,&HiddenBoard1,sizeof(struct Board));
     err(byte,"subserver_logic write client1 board to client2");
 
-    //end off by blocking both clients
+    //Ok both wait now
     n = write(client_socket1, &waitstate,sizeof(int));
-    err(n,"error setting turn to 1st client when block turn");
+    err(n,"error setting turn to 1st client when wait turn");
     n = write(client_socket2, &waitstate,sizeof(int));
-    err(n,"error setting turn to 2nd client when block turn");
+    err(n,"error setting turn to 2nd client when Wait turn");
     continue;
   }
   printf("Subserver socket closed.\n");
