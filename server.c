@@ -193,7 +193,7 @@ void subserver_logic(){
     if(!n)break;
 
     handle_attack(c2move,&Board1);
-    if(isGameOver(&Board1,&Board2)) break;
+    if(isGameOver(&Board1,&Board2)) break; // maybe we have to read the gameover message from game.c into clients after
 
     //set turn to read for both so u can write the new boards
     n = write(client_socket1, &readstate,sizeof(int));
