@@ -11,8 +11,8 @@ struct Board Board1;
 struct Board HiddenBoard1;
 struct Board Board2;
 struct Board HiddenBoard2;
-char c1move[2];
-char c2move[2];
+char c1move[3];
+char c2move[3];
 
 static void sighandler(int signo) {
   if(client_socket1>=0)close(client_socket1);
@@ -109,10 +109,10 @@ void gameSetupServer() {
   //print_board(&Board1);
 
   //turn logic for client2 board set
+  n = write(client_socket2, &writestate,sizeof(int));
+  err(n,"error setting turn to 2nd client when client2 turn");
   n = write(client_socket1, &waitstate,sizeof(int));
   err(n,"error setting turn to 1st client when client2 turn");
-  n = write(client_socket2, &writestate,sizeof(int));
-  err(n,"error setting block to 2nd client when client2 turn");
   //printf("GOT HERE\n");
 
   // Set client2 board
