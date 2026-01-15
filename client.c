@@ -117,8 +117,8 @@ void clientLogic(int server_socket){
   while(1){
     bytes = read(server_socket, &turn, sizeof(int));
     err(bytes,"ERROR SETTING TURN");
-    if(!bytes)break;
-    turner(turn);
+    //if(!bytes)break;
+    //turner(turn); NOTE THIS IS HOW WE DEBUG YOOOO
     if(turn==WAIT){
       //printf("wait loop\n");
       continue;
@@ -166,15 +166,19 @@ void clientLogic(int server_socket){
         err(bytes,"ERROR CHECKING");
         if(gameState==LOSE) {
           printf("You lost!\n");
+          close(server_socket);
+          exit(0);
         }
         if(gameState==WIN) {
           printf("You won!\n");
+          close(server_socket);
+          exit(0);
         }
         continue;
     }
   }
 
-  printf("Game end.\n");
+  printf("Enemy forfeited. You win.\n");
   close(server_socket);
   exit(0);
 }
