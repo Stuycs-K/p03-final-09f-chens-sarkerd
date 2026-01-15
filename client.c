@@ -125,16 +125,19 @@ void clientLogic(int server_socket){
     }
     if(turn == WRITE){
       char move[3];
-      printf("\nEnemies Board:\n");
-      print_board(&enemyBoard);
-      printf("Your turn! Enter coordinate to hit (ex B3): ");
-      scanf("%2s",move);
-      if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
-        printf("Invald input. Enter exactly one coordinate in bounds.\n");
-        continue;
+      while(1){
+        printf("\nEnemies Board:\n");
+        print_board(&enemyBoard);
+        printf("Your turn! Enter coordinate to hit (ex B3): ");
+        scanf("%2s",move);
+        if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
+          printf("Invald input. Enter exactly one coordinate in bounds.\n");
+          continue;
+        }
+        break;
       }
 
-      bytes = write(server_socket, &move, sizeof(move));
+      bytes = write(server_socket, move, sizeof(move));
       err(bytes,"ERROR WRITING MOVE TO SERVER");
     }
 
@@ -159,6 +162,7 @@ void clientLogic(int server_socket){
         if(gameState==WIN) {
           printf("You won!\n");
         }
+        continue;
     }
   }
 

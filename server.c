@@ -134,10 +134,10 @@ void gameSetupServer() {
   //HIDE boards
   HideBoard(&Board1,&HiddenBoard1);
   HideBoard(&Board2,&HiddenBoard2);
-  printf("Hidden board1 rn\n");
-  print_board(&HiddenBoard1);
-  printf("Hidden board2 rn\n");
-  print_board(&HiddenBoard2);
+  //printf("Hidden board1 rn\n");
+  //print_board(&HiddenBoard1);
+  //printf("Hidden board2 rn\n");
+  //print_board(&HiddenBoard2);
 
 
   //WRITE HIDDEN BOARD TO RESPECTIVE BOARDS
