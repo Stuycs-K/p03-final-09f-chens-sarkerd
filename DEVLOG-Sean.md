@@ -14,7 +14,7 @@ This document must be updated daily every time you finish a work session.
 - Working on prompter and coordinating information sending to server with partner
 
 ### 2026-01-08 - Game code writing
-- Worked on game functions 
+- Worked on game functions
 - Figured out client side stuff, made displays and general bug fixing
 
 ### 2026-01-09 - Finished game code writing

@@ -117,27 +117,35 @@ void clientLogic(int server_socket){
   while(1){
     bytes = read(server_socket, &turn, sizeof(int));
     err(bytes,"ERROR SETTING TURN");
-    if(!bytes)break;
-    turner(turn);
+    //if(!bytes)break;
+    //turner(turn); NOTE THIS IS HOW WE DEBUG YOOOO
     if(turn==WAIT){
       //printf("wait loop\n");
       continue;
     }
     if(turn == WRITE){
-      char move[3];
-      while(1){
+        char move[256];
+        char movewrite[3];
+        while(1){
         printf("\nEnemies Board:\n");
         print_board(&enemyBoard);
         printf("Your turn! Enter coordinate to hit (ex B3): ");
-        scanf("%2s",move);
-        if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
-          printf("Invald input. Enter exactly one coordinate in bounds.\n");
+        scanf("%s",move);
+        if(strlen(move)>3) {
+          printf("Invald input. Enter exactly one coordinate in bounds (CANT BE MORE THAN 2 CHARACTERS).\n");
+          sleep(1);
           continue;
         }
-        break;
+        move[2]='\0';
+        if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
+          printf("Invald input. Enter exactly one coordinate in bounds.\n");
+          sleep(1);
+          continue;
+        }
+        else break;
       }
-
-      bytes = write(server_socket, move, sizeof(move));
+      strcpy(movewrite,move);
+      bytes = write(server_socket, movewrite, sizeof(movewrite));
       err(bytes,"ERROR WRITING MOVE TO SERVER");
     }
 
@@ -158,15 +166,19 @@ void clientLogic(int server_socket){
         err(bytes,"ERROR CHECKING");
         if(gameState==LOSE) {
           printf("You lost!\n");
+          close(server_socket);
+          exit(0);
         }
         if(gameState==WIN) {
           printf("You won!\n");
+          close(server_socket);
+          exit(0);
         }
         continue;
     }
   }
 
-  printf("Game end.\n");
+  printf("Enemy forfeited. You win.\n");
   close(server_socket);
   exit(0);
 }
