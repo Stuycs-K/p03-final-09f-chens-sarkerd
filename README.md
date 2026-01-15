@@ -33,9 +33,7 @@ O = miss
 . = Water
 
 [EXTRA FEATURES] (check mark means done, will only do if we have time)
-- bomb special (hit 2 squares with 1 fire)
-- hitting consecutive times (debatable to keep/remove, since the game is kept on a 3x3 it might be unfair and end game too fast)
-- handle multiple games (ex. 2 clients connect, game 1, third client connects and waits for fourth client to start game 2 and so on)
+- handle multiple games (ex. 2 clients connect, game 1, third client connects and waits for fourth client to start game 2 and so on) ✔️
 - handle early disconnects (win by default)
 
 
