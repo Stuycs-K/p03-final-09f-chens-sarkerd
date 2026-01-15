@@ -11,8 +11,8 @@ struct Board Board1;
 struct Board HiddenBoard1;
 struct Board Board2;
 struct Board HiddenBoard2;
-char c1move[2];
-char c2move[2];
+char c1move[3];
+char c2move[3];
 
 static void sighandler(int signo) {
   if(client_socket1>=0)close(client_socket1);
