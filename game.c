@@ -24,8 +24,12 @@ int fire(struct Board *b, int row, int col){
      b->ships_remaining--;
      return 1;
   }
-  if(b->grid[row][col] == '.'){
+  else if(b->grid[row][col] == '.'){
     b->grid[row][col]= 'O';
+    return 1;
+  }
+  else if(b-->grid[row][col] == 'X' || b-->grid[row][col] == 'O'){
+    return 0;
   }
   return 0;
 }
