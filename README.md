@@ -34,17 +34,20 @@ O = miss
 
 [EXTRA FEATURES] (check mark means done, will only do if we have time)
 - handle multiple games (ex. 2 clients connect, game 1, third client connects and waits for fourth client to start game 2 and so on) ✔️
-- handle early disconnects (win by default)
+- handle ragequitting (win by default) ✔️
+ - does NOT work if you quit during ship placement. that is not ragequitting.  
 
 
 
 ### Instructions:
 
-open a server.
+clone the repo. 
 
-first client(P1) connects to server. 
+open a server (./server).
 
-second client(P2) connects to server. 
+first client(P1) connects to server (./client). 
+
+second client(P2) connects to server (./client). 
 
 client prompts for the two ship locations, one at a time. players type in where the ships are. 
 
