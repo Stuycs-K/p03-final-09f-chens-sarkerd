@@ -130,8 +130,8 @@ void clientLogic(int server_socket){
         printf("\nEnemies Board:\n");
         print_board(&enemyBoard);
         printf("Your turn! Enter coordinate to hit (ex B3): ");
-        scanf("%s",move);
-        if(strlen(move)>3) {
+        scanf("%255s",move);
+        if(strlen(move)>2) {
           printf("Invald input. Enter exactly one coordinate in bounds (CANT BE MORE THAN 2 CHARACTERS).\n");
           sleep(1);
           continue;
@@ -139,6 +139,13 @@ void clientLogic(int server_socket){
         move[2]='\0';
         if(move[0] < 'A' || move[0] > 'C' ||move[1] < '1' || move[1] > '3'){
           printf("Invald input. Enter exactly one coordinate in bounds.\n");
+          sleep(1);
+          continue;
+        }
+        int col = move[0] - 'A';
+        int row = move[1] - '1';
+        if(enemyBoard.grid[row][col] != '.'){
+          printf("You already fired at this coordinate. Choose another tile. \n");
           sleep(1);
           continue;
         }

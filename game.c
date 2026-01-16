@@ -28,9 +28,6 @@ int fire(struct Board *b, int row, int col){
     b->grid[row][col]= 'O';
     return 1;
   }
-  else if(b-->grid[row][col] == 'X' || b-->grid[row][col] == 'O'){
-    return 0;
-  }
   return 0;
 }
 
