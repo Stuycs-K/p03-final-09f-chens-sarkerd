@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdio.h>
+#include <pthread.h>
 #ifndef GAME_H
 #define GAME_H
 #define LOSE 999

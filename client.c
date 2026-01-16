@@ -5,6 +5,21 @@ int otherclientconnected=0;
 
 //problem is that turn is setting to 555 when its supposed to be gamestate, so i think that is making it a bit wonky also need to test win/lose con but the game is working
 
+/*
+void* listener_thread(void* arg) {
+  char c;
+  int n;
+  while(1) {
+    n = read(server_socket,&c,1);
+    if(n){
+      printf("You won by forfeit!\n");
+      close(server_socket);
+      exit(0);
+    }
+  }
+}
+*/
+
 static void sighandler(int signo) {
   printf("Client closed.\n");
   if(server_socket>=0)close(server_socket);
@@ -124,6 +139,8 @@ void clientLogic(int server_socket){
       continue;
     }
     if(turn == WRITE){
+        //pthread_t listener;
+        //pthread_create(&listener,NULL,listener_thread,NULL);
         char move[256];
         char movewrite[3];
         while(1){
@@ -152,6 +169,8 @@ void clientLogic(int server_socket){
         else break;
       }
       strcpy(movewrite,move);
+      //pthread_cancel(listener);
+      //pthread_join(listener,NULL);
       bytes = write(server_socket, movewrite, sizeof(movewrite));
       err(bytes,"ERROR WRITING MOVE TO SERVER");
     }

@@ -3,6 +3,8 @@
 
 int client_socket1 = -1;
 int client_socket2 = -1;
+int listener_socket1;
+int listener_socket2;
 int writestate = WRITE;
 int waitstate = WAIT;
 int readstate = READ;
@@ -14,10 +16,36 @@ struct Board HiddenBoard2;
 char c1move[3];
 char c2move[3];
 
+int isclosed(int fd) {
+    char buf;
+    int n = recv(fd, &buf, 1, MSG_PEEK);
+    if (n == 0) {
+        // socket closed
+        return 1;
+    } else if (n < 0) {
+        if(errno == EAGAIN || errno == EWOULDBLOCK) {
+            // no data but socket open
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+    return 0; // socket open
+}
+
 static void sighandler(int signo) {
   if(client_socket1>=0)close(client_socket1);
   if(client_socket2>=0)close(client_socket2);
   exit(0);
+}
+
+void* listener_thread(void* arg) {
+  while(1) {
+    //printf("HEY\n");
+    if(isclosed(listener_socket1))close(client_socket2);
+    if(isclosed(listener_socket2))close(client_socket1);
+    usleep(1000);
+  }
 }
 
 void HideBoard(struct Board *Board, struct Board *HiddenBoard) {
@@ -39,16 +67,6 @@ void handle_attack(char* move, struct Board *b){
   int hit = fire(b,row,col);
 }
 
-int isclosed(int fd) {
-  char c;
-  int value = read(fd,&c,1);
-  if(c<=0 || errno==EBADF) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
-}
 
 void win_disconnect(int win_socket, int lose_socket, int winner_id){
   int state = CHECK;
@@ -173,7 +191,13 @@ void gameSetupServer() {
 
 
 void subserver_logic(){
-
+  /*
+  listener_socket1 = dup(client_socket1);
+  listener_socket2 = dup(client_socket2);
+  fcntl(listener_socket1,F_SETFL,O_NONBLOCK);
+  fcntl(listener_socket2,F_SETFL,O_NONBLOCK);
+  pthread_t listener;
+  */
   gameSetupServer();
 
   while(1) {
@@ -183,6 +207,7 @@ void subserver_logic(){
     */
 
     //below is the turn logic when client1s turn
+    //pthread_create(&listener,NULL,listener_thread,NULL);
     int n = write(client_socket1, &writestate,sizeof(int));
     err(n,"error setting turn to 1st client when client1 turn");
     n = write(client_socket2, &waitstate,sizeof(int));
@@ -193,11 +218,14 @@ void subserver_logic(){
     if(n == 0) win_disconnect(client_socket2, client_socket1, 2);
     err(n,"error reading client1s move");
     if(!n)break;
+    //pthread_cancel(listener);
+    //pthread_join(listener,NULL);
 
     handle_attack(c1move,&Board2);
 
     if(isGameOver(&Board1,&Board2)) break;
 
+    //pthread_create(&listener,NULL,listener_thread,NULL);
     //below is the turn logic when client2s turn
     n = write(client_socket1, &waitstate,sizeof(int));
     err(n,"error setting turn to 1st client when client2 turn");
@@ -209,6 +237,8 @@ void subserver_logic(){
     if(n == 0) win_disconnect(client_socket1, client_socket2, 1);
     err(n,"error reading client2s move");
     if(!n)break;
+    //pthread_cancel(listener);
+    //pthread_join(listener,NULL);
 
     handle_attack(c2move,&Board1);
     if(isGameOver(&Board1,&Board2)) break; // maybe we have to read the gameover message from game.c into clients after
