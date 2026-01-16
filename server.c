@@ -50,6 +50,20 @@ int isclosed(int fd) {
   }
 }
 
+void win_disconnect(int win_socket, int lose_socket, int winner_id){
+  int state = CHECK;
+  int win = WIN;
+  int lose = LOSE;
+  write(win_socket, &state, sizeof(int));
+  write(lose_socket, &state, sizeof(int));
+  write(win_socket, &win, sizeof(int));
+  write(lose_socket, &lose, sizeof(int));
+  printf("Client %d wins by disconnect\n", winner_id);
+  close(win_socket);
+  close(lose_socket);
+  exit(0);
+}
+
 int isGameOver(struct Board *Board1, struct Board *Board2) {
   int lose = LOSE;
   int win = WIN;
@@ -103,6 +117,7 @@ void gameSetupServer() {
 
   // Set client1 board
   n = read(client_socket1,&Board1,sizeof(struct Board));
+  if(n == 0) win_disconnect(client_socket2, client_socket1, 2);
   err(n,"error reading client1s initial board");
   if(!n)exit(9);
   //printf("c1 board rn initial\n");
@@ -117,6 +132,7 @@ void gameSetupServer() {
 
   // Set client2 board
   n = read(client_socket2,&Board2,sizeof(struct Board));
+  if(n == 0) win_disconnect(client_socket1, client_socket2, 1);
   err(n,"error reading client2s initial board");
   if(!n)exit(9);
   //printf("GOT HERE 2\n");
@@ -174,6 +190,7 @@ void subserver_logic(){
 
     // read from client1 and attack
     n = read(client_socket1,c1move,sizeof(c1move));
+    if(n == 0) win_disconnect(client_socket2, client_socket1, 2);
     err(n,"error reading client1s move");
     if(!n)break;
 
@@ -189,6 +206,7 @@ void subserver_logic(){
 
     // read from client2 and rotate response
     n = read(client_socket2,c2move,sizeof(c2move));
+    if(n == 0) win_disconnect(client_socket1, client_socket2, 1);
     err(n,"error reading client2s move");
     if(!n)break;
 
@@ -248,6 +266,10 @@ int main(int argc, char *argv[] ) {
     int i = 0;
     printf("One client connected!\n");
     int n = write(client_socket1,&i,sizeof(int));
+    if(n<=0){
+      close(client_socket1);
+      continue;
+    }
     client_socket2 = server_tcp_handshake(listen_socket);
     i = 1;
     n = write(client_socket1,&i,sizeof(int));
